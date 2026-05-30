@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llm-response-cache"
+version = "0.1.0"
+description = "三层 LLM API 响应缓存：Exact Match → Semantic Cache → Hybrid Cache"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "zhangjiayang6835-cyber"},
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "numpy>=1.21",
+]
+
+[project.optional-dependencies]
+all = [
+    "sentence-transformers>=2.2",
+    "redis>=4.5",
+    "openai>=1.0",
+    "scikit-learn>=1.0",
+    "httpx>=0.24",
+]
+embedding = [
+    "sentence-transformers>=2.2",
+    "scikit-learn>=1.0",
+]
+redis = [
+    "redis>=4.5",
+]
+openai = [
+    "openai>=1.0",
+]
+dev = [
+    "pytest>=7.0",
+    "pytest-asyncio>=0.21",
+    "pytest-cov>=4.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["llm_cache*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtualenv
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Cache data (local vector store files)
+*.pkl
+*.npy
+cache_data/
+
+# Environment
+.env
+.env.local
+
+# Tests
+.pytest_cache/
+htmlcov/
+.coverage
