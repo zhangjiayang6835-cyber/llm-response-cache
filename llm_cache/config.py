@@ -26,6 +26,13 @@ class CacheConfig:
     l3_llm_fallback: bool = True
     l3_auto_cache_llm: bool = True  # LLM 返回后自动回写 L1+L2
 
+    # Prompt Compression
+    compression_enabled: bool = False    # 默认不开启，由用户显式开启
+    compression_level: str = "standard"  # mild / standard / aggressive
+    compress_before_cache: bool = True   # 查缓存前先压缩（提高命中率）
+    compress_before_llm: bool = True     # 调 LLM 前先压缩（省 token）
+    compression_min_tokens: int = 50     # 低于此长度不压缩
+
     # Redis (可选)
     redis_host: Optional[str] = None
     redis_port: int = 6379
