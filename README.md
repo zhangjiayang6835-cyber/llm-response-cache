@@ -208,6 +208,82 @@ resp, src = await cache.aquery("解释 EIP-1559")
 
 ---
 
+## 🚀 Hermes Agent 集成（缓存代理）
+
+把 LLM Response Cache 作为本地代理，架设在 Hermes Agent 和 LLM Provider 之间，所有 API 调用自动走三层缓存。
+
+### 架构
+
+```
+Hermes Agent  ──→  Local Proxy (:8080)  ──→  DeepSeek/OpenAI/...
+                      │
+                      ├─ L1 ExactMatchCache
+                      ├─ L2 SemanticCache
+                      └─ PromptCompressor (可选)
+```
+
+### 安装依赖
+
+```bash
+pip install fastapi uvicorn httpx
+```
+
+### 启动代理
+
+```bash
+# 方式 1：从项目目录启动
+cd llm-response-cache
+python -m llm_cache.proxy \
+    --upstream https://api.deepseek.com \
+    --compress \
+    --compression-level standard
+
+# 方式 2：使用启动脚本 (Windows)
+scripts/start-proxy.bat
+
+# 方式 3：设置环境变量后直接启动
+export LLM_CACHE_UPSTREAM=https://api.deepseek.com
+export LLM_CACHE_API_KEY=sk-xxx
+python -m llm_cache.proxy --compress
+```
+
+### 配置 Hermes
+
+开一个新终端：
+
+```bash
+# 把 Hermes 的模型调用指向本地缓存代理
+hermes config set model.base_url http://localhost:8080/v1
+hermes config set model.api_key sk-xxx  # 真实的 API Key
+```
+
+然后启动 Hermes，所有 API 调用自动经过缓存代理。
+
+### 验证代理
+
+```bash
+# 健康检查
+curl http://localhost:8080/health
+
+# 查看缓存统计
+curl http://localhost:8080/stats
+
+# 清空缓存
+curl -X POST http://localhost:8080/clear
+
+# 查看运行报告
+curl http://localhost:8080/report
+```
+
+### 注意
+
+- 代理默认只缓存 `chat/completions` 端点的 POST 请求
+- `stream=true` 的流式请求目前降级为非流式返回（仍走缓存）
+- `/v1/models` 等查询透传不缓存
+- 代理宕机不影响 Hermes — 只需要重启代理再改回 base_url 即可
+
+---
+
 ## 配置详解
 
 ```python
@@ -279,7 +355,8 @@ llm-response-cache/
 │   ├── exact_match.py        # L1: 精确匹配缓存
 │   ├── semantic_cache.py     # L2: 语义相似缓存
 │   ├── hybrid_cache.py       # L3: 混合引擎 + 压缩集成
-│   └── prompt_compressor.py  # L4: Prompt 压缩引擎 🔥
+│   ├── prompt_compressor.py  # L4: Prompt 压缩引擎 🔥
+│   └── proxy.py              # 🚀 Hermes 缓存代理 | __main__.py
 ├── examples/
 │   ├── basic_usage.py        # 基础用法示例
 │   └── openai_integration.py # OpenAI 集成示例
